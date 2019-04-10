@@ -3,28 +3,46 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
+using PeopleAddTable.Data;
 
 namespace homework_040819_peopleAddTable_ajax.Controllers
 {
     public class HomeController : Controller
     {
+        PeopleDb db = new PeopleDb(Properties.Settings.Default.ConStr);
+
         public ActionResult Index()
-        {
-            return View();
+        { 
+            var ppl = db.GetPeople();
+            return View(ppl);
         }
 
-        public ActionResult About()
+        [HttpPost]
+        public ActionResult AddPerson(Person p)
         {
-            ViewBag.Message = "Your application description page.";
-
-            return View();
+            if(p.FirstName == null|| p.LastName == null || p.Age == 0)
+            {
+                return Redirect("/");
+            }
+            db.AddPerson(p);
+            List<Person> ppl = db.GetPeople();
+            return Json(new { People = ppl });
         }
 
-        public ActionResult Contact()
+        [HttpPost]
+        public ActionResult Delete(int id)
         {
-            ViewBag.Message = "Your contact page.";
+            db.DeletePerson(id);
+            List<Person> ppl = db.GetPeople();
+            return Json(new { People = ppl });
+        }
 
-            return View();
+        [HttpPost]
+        public ActionResult Edit(Person p)
+        {
+            db.Edit(p);
+            List<Person> ppl = db.GetPeople();
+            return Json(new { People = ppl });
         }
     }
 }
